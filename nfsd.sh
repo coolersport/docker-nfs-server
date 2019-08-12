@@ -136,6 +136,23 @@ while true; do
 
 done
 
+set +u # SHARED_DIRECTORIES is optional
+IFS=' '
+shopt -s extglob # for collapsing consecutive slashes
+if [ -n "${SHARED_DIRECTORIES}" ]; then
+  for d in ${SHARED_DIRECTORIES}; do
+    p=${SHARED_DIRECTORY%"${SHARED_DIRECTORY##*[!/]}"}/$d
+    p="${p#"${p%%[!/]*}"}" # remove leading slashes
+    p="${p%"${p##*[!/]}"}" # remove trailing slashes
+    p=${p//+(\/)/\/} # reduce consecutive slashes
+    echo $p
+    if [ ! -d /$p ]; then
+      echo "Creating shared directory /$p..."
+      mkdir -p /$p;
+    fi
+  done
+fi
+
 while true; do
 
   # Check if NFS is STILL running by recording it's PID (if it's not running $pid will be null):
